@@ -16,15 +16,21 @@ DSH 的余额插件基本都是给人看的挂件、侧栏、悬浮球。这个�
 
 ## 安装
 
-```bash
-# 本地目录
-dsh plugin --profile web add link:/path/to/dsh-whale-balance
+**从 GitHub 直接装**（推荐，不用等 npm）：
 
-# 或从 npm（发布后）
-dsh plugin --profile web add dsh-whale-balance
+```bash
+dsh plugin --profile web add https://github.com/JiedonG-get/dsh-whale-balance
 ```
 
-装完重启 DSH。确认插件的 `bundles` 里在**靠前位置**（第一屏渲染前注册注入行）。
+装完重启 DSH。确认插件的 `bundles` 里在**靠前位置**（首页渲染前要注册注入行）。
+
+**本地目录**：
+
+```bash
+dsh plugin --profile web add link:/path/to/dsh-whale-balance
+```
+
+> 注：本插件未发布到 npm，npm 的自动化检测会拦住新账号发布。GitHub 安装即可。
 
 ## 配置
 

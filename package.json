@@ -10,12 +10,13 @@
     "./icon": "./icon.svg"
   },
   "files": [
-    "lib/",
-    "cordis.patch.yml",
-    "config.example.json",
-    "README.md",
     "LICENSE",
-    "icon.svg"
+    "README.md",
+    "assets/",
+    "config.example.json",
+    "cordis.patch.yml",
+    "icon.svg",
+    "lib/"
   ],
   "license": "MIT",
   "engines": {

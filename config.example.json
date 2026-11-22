@@ -1,0 +1,8 @@
+{
+  "showBadge": true,
+  "injectContext": true,
+  "injectText": "【白饭】余额 {currency} {balance}，{low}",
+  "toolEnabled": true,
+  "refName": "DEEPSEEK_API_KEY",
+  "lowWater": 5
+}

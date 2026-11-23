@@ -10,7 +10,7 @@ DSH 的余额插件基本都是给人看的挂件、侧栏、悬浮球。这个�
 
 | | 说明 |
 |---|---|
-| **上下文注入** | 每轮往 system prompt 的 context 里挂一行余额：`【白饭】余额 CNY 12.34，还够` |
+| **上下文注入** | 每轮往 system prompt 的 context 里挂一行：`【白饭】余额 CNY 12.34，还够 · 谷时，半价` |
 | **whale_balance 工具** | 模型想查就查，返回余额、是否可用、是否低于水位线 |
 | **首页角标** | 页面左下角一枚可拖动的小标签：整行加粗、颜色随峰谷、边框随水位，20 秒拉一次真实数据 |
 
@@ -44,9 +44,14 @@ dsh plugin --profile web add link:/path/to/dsh-whale-balance
 {
   "showBadge": true,
   "injectContext": true,
-  "injectText": "【白饭】余额 {currency} {balance}，{low}",
+  "injectText": "【白饭】余额 {currency} {balance}，{low} · {peak}",
   "toolEnabled": true,
-  "lowWater": 5
+  "lowWater": 5,
+  "colorNormal": "#4cd07d",
+  "colorLow": "#ff5b5b",
+  "fontSize": 15,
+  "opacity": 0.6,
+  "showPeak": true
 }
 ```
 
@@ -54,7 +59,10 @@ dsh plugin --profile web add link:/path/to/dsh-whale-balance
 |---|---|
 | `showBadge` | 是否在首页显示可拖动的余额角标 |
 | `injectContext` | 是否每轮把余额写进上下文 |
-| `injectText` | 注入的文本，可用 `{balance}` `{currency}` `{low}` |
+| `injectText` | 注入的文本，可用 `{balance}` `{currency}` `{low}` `{peak}` `{peakWord}` |
+| `showPeak` | 是否显示峰时/谷时（角标与注入都受它控制） |
+| `fontSize` / `opacity` | 角标字号、背景不透明度 |
+| `colorNormal` / `colorLow` | 角标**边框**色：正常 / 低于水位线 |
 | `lowWater` | 水位线（元），低于它时 `{low}` 变成「低于警戒线」 |
 | `refName` | 从 DSH 凭据里取哪一把 key，默认 `DEEPSEEK_API_KEY` |
 
@@ -64,7 +72,9 @@ dsh plugin --profile web add link:/path/to/dsh-whale-balance
 
 官方口径（2026-08-17 起）：**北京时间 9:00–12:00、14:00–18:00 为高峰，其余为空闲时段，空闲价格是高峰的一半**。
 
-角标最右侧显示 `峰时`（红）或 `谷时`（绿），整行文字颜色跟着变。
+角标最右侧显示 `峰时`（红）或 `谷时`（绿），整行文字颜色跟着变；注入的文本里用 `{peak}` 会变成「峰时，贵一倍」/「谷时，半价」——**不只是报数，还告诉你现在跑贵不贵**。
+
+> ⚠️ 时间按 **UTC+8 显式换算**：容器时区常常不是北京（可能跑 UTC），直接用 `getHours()` 会把峰谷判反。
 
 ## 怎么拿余额
 
@@ -76,11 +86,12 @@ GET https://api.deepseek.com/user/balance
 
 只读已有凭据，不新增、不上传、不落日志。请求失败不进缓存，后台每 10 秒重试直到成功。
 
-## 关于角标的两个坑（踩过，写下来）
+## 踩过的坑（写下来）
 
 1. **`tapIndex` 必须是 `html → html` 的纯函数。** 返回对象会让宿主每次渲染首页都 400，表现为「Web 页面尚不可用」——App 会把它判成插件故障并自动禁用。
 2. **注入脚本里不要依赖 `fetch` 的回调。** 页面侧回调不一定拿得到；改成数据脚本自己 `document.getElementById` 改文字。
-3. **数字别交给 JS 去写。** 最终稳的做法是：注入的 HTML 里就把 `白饭 CNY 12.34` 印好，脚本只负责拖动和面板。页面 JS 执行环境不可控（回调不触发、fetch 被拦都遇到过），但 HTML 一定会渲染。
+3. **时间别信容器本地时区。** `date` 显示 UTC 时，`new Date().getHours()` 拿到的是 UTC 小时，峰谷会判反。统一用 `(getUTCHours()*60 + getUTCMinutes() + 480) % 1440`。
+4. **数字别交给 JS 去写。** 最终稳的做法是：注入的 HTML 里就把 `白饭 CNY 12.34` 印好，脚本只负责拖动和面板。页面 JS 执行环境不可控（回调不触发、fetch 被拦都遇到过），但 HTML 一定会渲染。
 
 ## 配置示例
 

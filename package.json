@@ -1,6 +1,6 @@
 {
   "name": "dsh-whale-balance",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "白饭余额：把 DeepSeek 账户余额写进对话上下文，让模型自己知道还剩多少钱（含可拖动角标与查询工具）",
   "type": "module",
   "main": "lib/index.js",
